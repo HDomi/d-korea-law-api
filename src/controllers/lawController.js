@@ -1,4 +1,12 @@
-import { searchLaw, searchPrecedent } from '../services/lawApiService.js';
+import {
+  searchLaw,
+  searchPrecedent,
+  searchArticles,
+  searchConstitutional,
+  searchInterpretation,
+  searchAppeals,
+  searchAdministrativeRules
+} from '../services/lawApiService.js';
 
 /**
  * Heuristic keyword extractor when AI (Gemini) is not yet active
@@ -69,6 +77,77 @@ export async function generateLawGuide(req, res, next) {
     });
   } catch (error) {
     console.error('Error in generateLawGuide controller:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An internal server error occurred while retrieving law data.',
+      details: error.message
+    });
+  }
+}
+
+/**
+ * Unified search controller to search articles (몇항 몇조 등), precedents, and other materials
+ */
+export async function searchAllLawInfo(req, res, next) {
+  try {
+    const query = req.body.query || req.query.query;
+
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: 'Query parameter "query" is required.'
+      });
+    }
+
+    console.log(`[LawController] Performing unified search for keyword: "${query}"`);
+
+    // Perform parallel searches for all targets
+    const [
+      articlesResult,
+      precedentsResult,
+      constitutionalResult,
+      interpretationResult,
+      appealsResult,
+      adminRulesResult
+    ] = await Promise.allSettled([
+      searchArticles(query),
+      searchPrecedent(query),
+      searchConstitutional(query),
+      searchInterpretation(query),
+      searchAppeals(query),
+      searchAdministrativeRules(query)
+    ]);
+
+    const laws = articlesResult.status === 'fulfilled' ? articlesResult.value.items : [];
+    const precedents = precedentsResult.status === 'fulfilled' ? precedentsResult.value.items : [];
+
+    // Combine other targets into a single "others" array
+    const others = [];
+    if (constitutionalResult.status === 'fulfilled') {
+      others.push(...constitutionalResult.value.items.map(item => ({ ...item, targetType: '헌재결정례' })));
+    }
+    if (interpretationResult.status === 'fulfilled') {
+      others.push(...interpretationResult.value.items.map(item => ({ ...item, targetType: '법령해석례' })));
+    }
+    if (appealsResult.status === 'fulfilled') {
+      others.push(...appealsResult.value.items.map(item => ({ ...item, targetType: '행정심판례' })));
+    }
+    if (adminRulesResult.status === 'fulfilled') {
+      others.push(...adminRulesResult.value.items.map(item => ({ ...item, targetType: '행정규칙' })));
+    }
+
+    return res.status(200).json({
+      success: true,
+      keyword: query,
+      data: {
+        laws,
+        precedents,
+        others
+      },
+      message: 'Successfully retrieved law, precedent, and other related information.'
+    });
+  } catch (error) {
+    console.error('Error in searchAllLawInfo controller:', error);
     return res.status(500).json({
       success: false,
       error: 'An internal server error occurred while retrieving law data.',

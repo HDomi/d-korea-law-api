@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateLawGuide } from '../controllers/lawController.js';
+import { generateLawGuide, searchAllLawInfo } from '../controllers/lawController.js';
 
 const router = express.Router();
 
@@ -12,5 +12,9 @@ router.get('/law-guide', (req, res) => {
     message: 'To search laws, please send a POST request with a JSON body containing "keyword", "userMessage", or "category".'
   });
 });
+
+// Routes for unified search (laws/articles, precedents, others)
+router.post('/search', searchAllLawInfo);
+router.get('/search', searchAllLawInfo);
 
 export default router;
