@@ -74,6 +74,7 @@ jobs:
             -e PORT="$APP_PORT" \
             -e NODE_ENV="production" \
             -e LAW_API_OC="${{ secrets.LAW_API_OC }}" \
+            -e GOOGLE_API_KEY="${{ secrets.GOOGLE_API_KEY }}" \
             "$APP_NAME:latest"
 
           EOF
