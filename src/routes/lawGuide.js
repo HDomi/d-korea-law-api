@@ -39,7 +39,7 @@ async function extractLegalKeyword(userMessage, category) {
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -178,22 +178,14 @@ async function generateLegalGuide(userMessage, category, lawData) {
   `;
 
   try {
-    // Try using gemini-2.5-pro first for premium logic output quality
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.0-flash",
       contents: prompt,
     });
     return response.text;
-  } catch (proError) {
-    console.warn(
-      "gemini-2.5-pro failed (possibly due to quota limit), falling back to gemini-1.5-flash:",
-      proError.message,
-    );
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: prompt,
-    });
-    return response.text;
+  } catch (error) {
+    console.error("Gemini guide generation error:", error.message);
+    throw error;
   }
 }
 
