@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { config } from './config/env.js';
 import lawRouter from './routes/lawRoutes.js';
+import lawGuideRouter from './routes/lawGuide.js';
 
 const app = express();
 
@@ -19,6 +20,7 @@ if (config.nodeEnv === 'development') {
 
 // Routes
 app.use('/api', lawRouter);
+app.use('/api', lawGuideRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -28,6 +28,7 @@ pnpm install
 ```env
 PORT=5556
 LAW_API_OC="발급받은_오픈API_OC_인증키"
+GOOGLE_API_KEY="발급받은_구글_제미나이_API키"
 NODE_ENV=development
 ```
 > **Note**: 로컬 IP가 국가법령정보 공동활용 시스템에 등록되어 있지 않으면 API 요청이 실패하고 자동으로 Mock 데이터 모드로 작동합니다.
@@ -41,6 +42,42 @@ pnpm dev
 ---
 
 ## API 사용 방법
+
+### 맞춤형 법률 가이드 및 서류 합성 API: `POST /api/law-guide`
+
+사용자의 자연어 사연과 카테고리를 입력받아, 제미나이(Gemini) API를 활용해 맞춤형 대응 가이드(Markdown 형태)와 수신인/금액 등이 들어간 완벽한 자동 서식 텍스트를 함께 생성하여 제공하는 핵심 API 엔드포인트입니다.
+
+#### 1. 요청 형식 (Requests)
+- **URL**: `/api/law-guide`
+- **Method**: `POST`
+- **Headers**: `Content-Type: application/json`
+- **Body**:
+  ```json
+  {
+    "userMessage": "원룸 월세가 만기됐는데 집주인이 전화를 안 받고 보증금 300만 원을 안 줍니다.",
+    "category": "housing"
+  }
+  ```
+  - `category` 값으로 가능한 유형: `"housing"` (주택임대차), `"labor"` (임금체불), `"scam"` (사기) 등
+
+#### 2. 응답 형식 (Response)
+성공적인 요청 시 `200 OK` 상태 코드와 함께 다음과 같은 구조의 JSON 객체를 반환합니다.
+
+```json
+{
+  "success": true,
+  "category": "housing",
+  "searchKeyword": "주택임대차",
+  "guide": "## 🔍 1. 내 상황 팩트 체크 및 위로\n...\n## 📋 2. 지금 당장 해야 할 액션 플랜\n- [ ] 1단계: ...\n## ✍️ 3. 나홀로 대응 서류 자동 완성\n[내용증명 서식]\n수신인: [임대인 이름 입력]\n...\n## ⚠️ 주의사항\n본 가이드는 AI가 법령 데이터를 기반으로 요약한 참고 자료일 뿐...",
+  "rawLawData": {
+    "laws": [ ... ],
+    "precedents": [ ... ],
+    "others": [ ... ]
+  }
+}
+```
+
+---
 
 ### 통합 검색 API: `POST /api/search` 및 `GET /api/search`
 
@@ -136,7 +173,36 @@ pnpm dev
 
 ### 외부 호출 샘플 예제 (External Code Examples)
 
-#### JavaScript (fetch API)
+#### JavaScript (POST /api/law-guide 호출 예시)
+```javascript
+fetch('http://localhost:5556/api/law-guide', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    userMessage: '월급이 2달 동안 밀려있어요.',
+    category: 'labor'
+  })
+})
+  .then(response => response.json())
+  .then(res => {
+    if (res.success) {
+      console.log('검색 키워드:', res.searchKeyword);
+      console.log('AI 가이드 및 서식 (Markdown):', res.guide);
+    }
+  })
+  .catch(err => console.error('네트워크 에러:', err));
+```
+
+#### Curl Command (POST /api/law-guide)
+```bash
+curl -X POST http://localhost:5556/api/law-guide \
+     -H "Content-Type: application/json" \
+     -d '{"userMessage": "원룸 월세가 만기됐는데 집주인이 전화를 안 받고 보증금 300만 원을 안 줍니다.", "category": "housing"}'
+```
+
+#### JavaScript (fetch API - /api/search 호출 예시)
 ```javascript
 const query = '임금체불';
 
