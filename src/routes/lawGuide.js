@@ -8,6 +8,7 @@ import {
   searchAppeals,
   searchAdministrativeRules,
 } from "../services/lawApiService.js";
+import { reduceTokenPayload } from "../utils/tokenDieter.js";
 
 const router = Router();
 
@@ -221,10 +222,11 @@ router.post("/law-guide", async (req, res) => {
     }
 
     // [Step 3] Synthesize guide and documents markdown using Gemini API
+    const slimLawData = reduceTokenPayload(lawSearchResult);
     const finalGuideMarkdown = await generateLegalGuide(
       userMessage,
       category,
-      lawSearchResult,
+      slimLawData,
     );
 
     // [Step 4] Respond back with the generated guide and original data source
@@ -247,19 +249,25 @@ router.post("/law-guide", async (req, res) => {
       statusCode = error.status;
       if (statusCode === 429) {
         errorType = "GeminiQuotaExceeded";
-        errorMessage = "Gemini API quota exceeded or rate limited. Please try again later.";
+        errorMessage =
+          "Gemini API quota exceeded or rate limited. Please try again later.";
       } else if (statusCode === 503) {
         errorType = "GeminiServiceUnavailable";
-        errorMessage = "Gemini API is currently experiencing high demand or is temporarily unavailable.";
+        errorMessage =
+          "Gemini API is currently experiencing high demand or is temporarily unavailable.";
       } else if (statusCode === 404) {
         errorType = "GeminiModelNotFound";
-        errorMessage = "The requested Gemini model was not found in the current environment.";
+        errorMessage =
+          "The requested Gemini model was not found in the current environment.";
       } else {
         errorType = `GeminiApiError(${statusCode})`;
       }
 
       if (error.error) {
-        errorDetails = typeof error.error === 'string' ? error.error : JSON.stringify(error.error);
+        errorDetails =
+          typeof error.error === "string"
+            ? error.error
+            : JSON.stringify(error.error);
       }
     } else if (error.message && error.message.includes("API key")) {
       statusCode = 401;
@@ -271,7 +279,7 @@ router.post("/law-guide", async (req, res) => {
       success: false,
       error: errorType,
       message: errorMessage,
-      details: errorDetails || error.stack || null
+      details: errorDetails || error.stack || null,
     });
   }
 });
