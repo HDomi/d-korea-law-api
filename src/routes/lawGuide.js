@@ -237,9 +237,41 @@ router.post("/law-guide", async (req, res) => {
     });
   } catch (error) {
     console.error("최종 가이드 생성 중 서버 에러 발생:", error);
-    return res.status(500).json({
+
+    let statusCode = 500;
+    let errorType = "InternalServerError";
+    let errorMessage = error.message || "An unexpected error occurred.";
+    let errorDetails = null;
+
+    if (error.status) {
+      statusCode = error.status;
+      if (statusCode === 429) {
+        errorType = "GeminiQuotaExceeded";
+        errorMessage = "Gemini API quota exceeded or rate limited. Please try again later.";
+      } else if (statusCode === 503) {
+        errorType = "GeminiServiceUnavailable";
+        errorMessage = "Gemini API is currently experiencing high demand or is temporarily unavailable.";
+      } else if (statusCode === 404) {
+        errorType = "GeminiModelNotFound";
+        errorMessage = "The requested Gemini model was not found in the current environment.";
+      } else {
+        errorType = `GeminiApiError(${statusCode})`;
+      }
+
+      if (error.error) {
+        errorDetails = typeof error.error === 'string' ? error.error : JSON.stringify(error.error);
+      }
+    } else if (error.message && error.message.includes("API key")) {
+      statusCode = 401;
+      errorType = "UnauthorizedApiKey";
+      errorMessage = "Gemini API key is invalid or not configured correctly.";
+    }
+
+    return res.status(statusCode).json({
       success: false,
-      error: "서버 내부 오류로 가이드를 생성하지 못했습니다.",
+      error: errorType,
+      message: errorMessage,
+      details: errorDetails || error.stack || null
     });
   }
 });
