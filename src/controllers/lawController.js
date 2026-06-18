@@ -32,7 +32,7 @@ const extractHeuristicKeyword = (userMessage, category) => {
  */
 export async function generateLawGuide(req, res, next) {
   try {
-    const { userMessage, category, keyword } = req.body;
+    const { userMessage, category, keyword, ...extraParams } = req.body;
 
     // Determine the keyword to query
     let queryKeyword = keyword;
@@ -46,12 +46,12 @@ export async function generateLawGuide(req, res, next) {
       queryKeyword = extractHeuristicKeyword(userMessage, category);
     }
 
-    console.log(`[LawController] Querying law data with keyword: "${queryKeyword}" (Category: ${category || 'none'})`);
+    console.log(`[LawController] Querying law data with keyword: "${queryKeyword}" (Category: ${category || 'none'}) and extra parameters:`, extraParams);
 
     // Perform parallel searches for laws and precedents
     const [lawsResult, precedentsResult] = await Promise.allSettled([
-      searchLaw(queryKeyword),
-      searchPrecedent(queryKeyword)
+      searchLaw(queryKeyword, extraParams),
+      searchPrecedent(queryKeyword, extraParams)
     ]);
 
     const laws = lawsResult.status === 'fulfilled' ? lawsResult.value : { target: 'law', totalCount: 0, items: [], error: lawsResult.reason?.message };

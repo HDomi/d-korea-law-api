@@ -157,7 +157,7 @@ const getMockData = (target, query) => {
  * @param {string} query Search keyword
  * @returns {Promise<object>} Parsed results
  */
-export async function searchLaw(query) {
+export async function searchLaw(query, extraParams = {}) {
   if (!query) {
     throw new Error('Query parameter is required for law search');
   }
@@ -172,7 +172,8 @@ export async function searchLaw(query) {
         OC: config.lawApiOc,
         target: 'law',
         type: 'XML',
-        query: query
+        query: query,
+        ...extraParams
       },
       timeout: 5000 // 5 seconds timeout
     });
@@ -189,7 +190,7 @@ export async function searchLaw(query) {
  * @param {string} query Search keyword
  * @returns {Promise<object>} Parsed results
  */
-export async function searchPrecedent(query) {
+export async function searchPrecedent(query, extraParams = {}) {
   if (!query) {
     throw new Error('Query parameter is required for precedent search');
   }
@@ -204,7 +205,8 @@ export async function searchPrecedent(query) {
         OC: config.lawApiOc,
         target: 'prec',
         type: 'XML',
-        query: query
+        query: query,
+        ...extraParams
       },
       timeout: 5000
     });
