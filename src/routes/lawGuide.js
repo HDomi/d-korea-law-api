@@ -17,25 +17,33 @@ const aiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 const ai = aiKey ? new GoogleGenAI({ apiKey: aiKey }) : null;
 
 /**
- * Step 1: Extract law search keywords from user's natural language message
+ * Step 1: Extract law search keywords and validate domain from user's natural language message
  */
 async function extractLegalKeyword(userMessage, category) {
   if (!ai) {
-    return category === "housing"
+    const isWithinDomain = ["housing", "labor", "scam"].includes(category);
+    const keyword = category === "housing"
       ? "주택임대차"
       : category === "labor"
         ? "임금체불"
         : "사기";
+    return { keyword, isWithinDomain };
   }
 
   const prompt = `
-    당신은 사용자의 일상적인 억울한 사연을 듣고, 국가법령정보센터에서 관련 법 조문이나 판례를 검색할 수 있도록 가장 정확한 '법률 핵심 키워드' 하나를 추출하는 전문가입니다.
-    
+    당신은 사용자의 일상적인 억울한 사연을 듣고 관련 법률 핵심 키워드를 추출하고, 해당 사연이 허용된 3가지 법률 도메인에 속하는지 판별하는 전문가입니다.
+
+    [허용된 3가지 도메인]
+    1. 부동산/주거 (housing): 전세보증금 미반환, 원룸 월세 보증금 먹튀, 임대차 계약 만료 후 보증금 미반환 등 임대차 관련 청년/대학생 소액 분쟁
+    2. 노동/직장 (labor): 아르바이트 또는 중소기업 임금체불, 주휴수당 미지급, 월급/퇴직금 미지급 소액 분쟁
+    3. 사이버/민사 (scam): 당근마켓, 번개장터, 중고나라 등 중고거래 사기 및 소액 먹튀
+
     [사용자 카테고리]: ${category}
     [사용자 사연]: "${userMessage}"
-    
-    위 사연을 기반으로 법령 검색창에 쳤을 때 관련 주택임대차보호법, 근로기준법, 형법 등이 가장 잘 검색될 만한 단성/단일 명사 형태의 법률 키워드 딱 1개만 추출하세요.
-    예시: "집주인이 돈 안 줌" -> "주택임대차", "월급 밀림" -> "임금체불", "중고 사기꾼" -> "사기"
+
+    위 사연을 검토하여 다음 작업을 수행하세요:
+    1. 사연이 위 3가지 도메인 중 하나에 부합하는지 여부(isWithinDomain)를 판단하세요. 카테고리가 지정되었더라도 사연의 실제 내용이 위 3가지 주제(보증금 미반환, 임금체불/주휴수당 미지급, 중고거래 사기/먹튀)와 무관하다면 false로 판단해야 합니다. (예: 음주운전, 이혼 소송, 폭행, 모욕죄, 주식 사기 등은 false)
+    2. 부합하는 경우(true), 국가법령정보센터에서 관련 법 조문이나 판례를 검색하기에 가장 적절한 단성/단일 명사 형태의 법률 키워드를 1개 추출하세요. (예: "주택임대차", "임금체불", "사기" 등) 부합하지 않는 경우(false) 빈 문자열("")을 반환하세요.
   `;
 
   try {
@@ -49,26 +57,35 @@ async function extractLegalKeyword(userMessage, category) {
           properties: {
             keyword: {
               type: Type.STRING,
-              description: "추출된 단일 법률 검색어",
+              description: "추출된 단일 법률 검색어 (부합하지 않는 경우 빈 문자열)",
+            },
+            isWithinDomain: {
+              type: Type.BOOLEAN,
+              description: "사연이 허용된 3가지 도메인에 속하는지 여부",
             },
           },
-          required: ["keyword"],
+          required: ["keyword", "isWithinDomain"],
         },
       },
     });
 
     const result = JSON.parse(response.text);
-    return result.keyword || "법률";
+    return {
+      keyword: result.keyword || "",
+      isWithinDomain: result.isWithinDomain === true,
+    };
   } catch (error) {
     console.error(
       "Gemini keyword extraction error, fallback to category mapping:",
       error.message,
     );
-    return category === "housing"
+    const isWithinDomain = ["housing", "labor", "scam"].includes(category);
+    const keyword = category === "housing"
       ? "주택임대차"
       : category === "labor"
         ? "임금체불"
         : "사기";
+    return { keyword, isWithinDomain };
   }
 }
 
@@ -206,13 +223,34 @@ router.post("/law-guide", async (req, res) => {
       });
     }
 
-    // [Step 1] Extract search keyword from natural language input
-    const extractedKeyword = await extractLegalKeyword(userMessage, category);
+    // Immediately cut off if the category is not one of the allowed domains
+    if (!["housing", "labor", "scam"].includes(category)) {
+      return res.json({
+        success: true,
+        category,
+        searchKeyword: "",
+        guide: "저는 저 3가지 도메인에 대한 전문 봇이라 다른건 대답할수 없습니다",
+        rawLawData: { laws: [], precedents: [], others: [] }
+      });
+    }
+
+    // [Step 1] Extract search keyword and check domain from natural language input
+    const { keyword, isWithinDomain } = await extractLegalKeyword(userMessage, category);
+
+    if (!isWithinDomain) {
+      return res.json({
+        success: true,
+        category,
+        searchKeyword: "",
+        guide: "저는 저 3가지 도메인에 대한 전문 봇이라 다른건 대답할수 없습니다",
+        rawLawData: { laws: [], precedents: [], others: [] }
+      });
+    }
 
     // [Step 2] Fetch matching law/precedent/others data from local services
     let lawSearchResult;
     try {
-      lawSearchResult = await fetchLocalLawData(extractedKeyword);
+      lawSearchResult = await fetchLocalLawData(keyword);
     } catch (searchError) {
       console.error(
         "국가법령 검색 로컬 서비스 호출 실패, Fallback 작동:",
@@ -233,7 +271,7 @@ router.post("/law-guide", async (req, res) => {
     return res.json({
       success: true,
       category,
-      searchKeyword: extractedKeyword,
+      searchKeyword: keyword,
       guide: finalGuideMarkdown,
       rawLawData: lawSearchResult,
     });
