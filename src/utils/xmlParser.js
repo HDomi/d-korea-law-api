@@ -1,4 +1,5 @@
 import { parseStringPromise } from 'xml2js';
+import { config } from '../config/env.js';
 
 /**
  * Helper to safely extract single string value from xml2js array format
@@ -8,6 +9,23 @@ const getSingleValue = (arr) => {
     return arr[0];
   }
   return '';
+};
+
+/**
+ * Helper to build a valid detail link from a relative or absolute URL returned by the API
+ * by prepending the domain if needed and replacing the OC key placeholder with our configured key.
+ */
+const buildLink = (relativeLink) => {
+  if (!relativeLink) return '';
+  let processed = relativeLink;
+  if (processed.includes('OC=')) {
+    processed = processed.replace(/OC=[^&]+/, `OC=${config.lawApiOc || '인증키'}`);
+  }
+  if (processed.startsWith('http://') || processed.startsWith('https://')) {
+    return processed;
+  }
+  const separator = processed.startsWith('/') ? '' : '/';
+  return `https://www.law.go.kr${separator}${processed}`;
 };
 
 /**
@@ -29,7 +47,7 @@ export async function parseLawSearchXml(xmlString) {
 
     const laws = rawLaws.map(item => {
       const relativeLink = getSingleValue(item.법령상세링크);
-      const link = relativeLink ? `https://www.law.go.kr${relativeLink}` : '';
+      const link = buildLink(relativeLink);
 
       return {
         lawId: getSingleValue(item.법령일련번호),
@@ -73,7 +91,7 @@ export async function parsePrecSearchXml(xmlString) {
 
     const precedents = rawPrecs.map(item => {
       const relativeLink = getSingleValue(item.판례상세링크);
-      const link = relativeLink ? `https://www.law.go.kr${relativeLink}` : '';
+      const link = buildLink(relativeLink);
 
       return {
         precId: getSingleValue(item.판례일련번호),
@@ -116,7 +134,7 @@ export async function parseArticlesSearchXml(xmlString) {
 
     const articles = rawItems.map(item => {
       const relativeLink = getSingleValue(item.조문상세링크) || getSingleValue(item.법령상세링크);
-      const link = relativeLink ? `https://www.law.go.kr${relativeLink}` : '';
+      const link = buildLink(relativeLink);
 
       return {
         lawId: getSingleValue(item.법령일련번호),
@@ -158,7 +176,7 @@ export async function parseDetcSearchXml(xmlString) {
 
     const items = rawItems.map(item => {
       const relativeLink = getSingleValue(item.결정례상세링크) || getSingleValue(item.판례상세링크);
-      const link = relativeLink ? `https://www.law.go.kr${relativeLink}` : '';
+      const link = buildLink(relativeLink);
 
       return {
         id: getSingleValue(item.결정례일련번호),
@@ -201,7 +219,7 @@ export async function parseExpcSearchXml(xmlString) {
 
     const items = rawItems.map(item => {
       const relativeLink = getSingleValue(item.해석례상세링크);
-      const link = relativeLink ? `https://www.law.go.kr${relativeLink}` : '';
+      const link = buildLink(relativeLink);
 
       return {
         id: getSingleValue(item.해석례일련번호),
@@ -242,7 +260,7 @@ export async function parseDeccSearchXml(xmlString) {
 
     const items = rawItems.map(item => {
       const relativeLink = getSingleValue(item.재결례상세링크);
-      const link = relativeLink ? `https://www.law.go.kr${relativeLink}` : '';
+      const link = buildLink(relativeLink);
 
       return {
         id: getSingleValue(item.재결례일련번호),
@@ -283,7 +301,7 @@ export async function parseAdmrulSearchXml(xmlString) {
 
     const items = rawItems.map(item => {
       const relativeLink = getSingleValue(item.행정규칙상세링크);
-      const link = relativeLink ? `https://www.law.go.kr${relativeLink}` : '';
+      const link = buildLink(relativeLink);
 
       return {
         id: getSingleValue(item.행정규칙일련번호),

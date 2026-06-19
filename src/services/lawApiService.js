@@ -33,7 +33,7 @@ const getMockData = (target, query) => {
             promulgationDate: '20200731',
             promulgationNumber: '17471',
             department: '법무부',
-            link: 'https://www.law.go.kr/법령/주택임대차보호법'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=221873'
           },
           {
             lawId: '002342',
@@ -43,7 +43,7 @@ const getMockData = (target, query) => {
             promulgationDate: '20231101',
             promulgationNumber: '33890',
             department: '법무부',
-            link: 'https://www.law.go.kr/법령/주택임대차보호법시행령'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=252377'
           }
         ]
       };
@@ -60,7 +60,7 @@ const getMockData = (target, query) => {
             promulgationDate: '20210105',
             promulgationNumber: '17822',
             department: '고용노동부',
-            link: 'https://www.law.go.kr/법령/근로기준법'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=233959'
           },
           {
             lawId: '001124',
@@ -70,7 +70,7 @@ const getMockData = (target, query) => {
             promulgationDate: '20220414',
             promulgationNumber: '18833',
             department: '고용노동부',
-            link: 'https://www.law.go.kr/법령/근로자퇴직급여보장법'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=238426'
           }
         ]
       };
@@ -87,7 +87,7 @@ const getMockData = (target, query) => {
             promulgationDate: '20231020',
             promulgationNumber: '19702',
             department: '법무부',
-            link: 'https://www.law.go.kr/법령/형법'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=250682'
           }
         ]
       };
@@ -105,7 +105,7 @@ const getMockData = (target, query) => {
             paragraphNumber: '2',
             articleTitle: '보증금의 회수',
             content: '임차인은 임차주택에 대하여 보증금 반환청구소송의 확정판결이나 그 밖에 이에 준하는 집행권원에 기한 경매를 신청하는 경우에는 반대의무의 이행이나 이행의 제공을 집행개시의 요건으로 하지 아니한다.',
-            link: 'https://www.law.go.kr/법령/주택임대차보호법/제3조의2'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=221873#J3의2'
           },
           {
             lawId: '002341',
@@ -114,7 +114,7 @@ const getMockData = (target, query) => {
             paragraphNumber: '1',
             articleTitle: '임대차기간 등',
             content: '기간을 정하지 아니하거나 2년 미만으로 정한 임대차는 그 기간을 2년으로 본다. 다만, 임차인은 2년 미만으로 정한 기간이 유효함을 주장할 수 있다.',
-            link: 'https://www.law.go.kr/법령/주택임대차보호법/제4조'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=221873#J4'
           }
         ]
       };
@@ -130,7 +130,7 @@ const getMockData = (target, query) => {
             paragraphNumber: '',
             articleTitle: '금품 청산',
             content: '사용자는 근로자가 사망하거나 퇴직한 경우에는 그 지급 사유가 발생한 날부터 14일 이내에 임금, 보상금, 그 밖의 모든 금품을 지급하여야 한다. 다만, 특별한 사정이 있을 경우에는 당사자 사이의 합의에 의하여 기일을 연장할 수 있다.',
-            link: 'https://www.law.go.kr/법령/근로기준법/제36조'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=233959#J36'
           },
           {
             lawId: '001124',
@@ -139,7 +139,7 @@ const getMockData = (target, query) => {
             paragraphNumber: '1',
             articleTitle: '퇴직금제도의 설정',
             content: '퇴직금제도를 설정하려는 사용자는 계속근로기간 1년에 대하여 30일분 이상의 평균임금을 퇴직금으로 퇴직 근로자에게 지급할 수 있는 제도를 설정하여야 한다.',
-            link: 'https://www.law.go.kr/법령/근로자퇴직급여보장법/제8조'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=238426#J8'
           }
         ]
       };
@@ -155,7 +155,7 @@ const getMockData = (target, query) => {
             paragraphNumber: '1',
             articleTitle: '사기',
             content: '사람을 기망하여 재물의 교부를 받거나 재산상의 이익을 취득한 자는 10년 이하의 징역 또는 2천만원 이하의 벌금에 처한다.',
-            link: 'https://www.law.go.kr/법령/형법/제347조'
+            link: 'https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=250682#J347'
           }
         ]
       };
@@ -174,7 +174,7 @@ const getMockData = (target, query) => {
             court: '대법원',
             caseType: '민사',
             judgmentType: '판결',
-            link: 'https://www.law.go.kr/판례/임대차보증금반환-(2019다280375)'
+            link: 'https://www.law.go.kr/LSW/precInfoP.do?precSeq=204782'
           },
           {
             precId: '210451',
@@ -184,7 +184,7 @@ const getMockData = (target, query) => {
             court: '대법원',
             caseType: '민사',
             judgmentType: '판결',
-            link: 'https://www.law.go.kr/판례/건물명도-(2020다290112)'
+            link: 'https://www.law.go.kr/LSW/precInfoP.do?precSeq=211603'
           }
         ]
       };
@@ -201,7 +201,7 @@ const getMockData = (target, query) => {
             court: '대법원',
             caseType: '민사',
             judgmentType: '판결',
-            link: 'https://www.law.go.kr/판례/임금-(2018다234123)'
+            link: 'https://www.law.go.kr/LSW/precInfoP.do?precSeq=197825'
           }
         ]
       };
@@ -218,7 +218,7 @@ const getMockData = (target, query) => {
             court: '대법원',
             caseType: '형사',
             judgmentType: '판결',
-            link: 'https://www.law.go.kr/판례/사기-(2017도12345)'
+            link: 'https://www.law.go.kr/LSW/precInfoP.do?precSeq=185847'
           }
         ]
       };
@@ -237,7 +237,7 @@ const getMockData = (target, query) => {
           court: '헌법재판소',
           caseType: '헌바',
           judgmentType: '합헌결정',
-          link: 'https://www.law.go.kr/결정례/주택임대차보호법제3조위헌소송-(2020헌바123)'
+          link: 'https://www.law.go.kr/LSW/detcInfoP.do?detcSeq=167232'
         }
       ]
     };
@@ -253,7 +253,7 @@ const getMockData = (target, query) => {
           caseNumber: '20-0045',
           judgmentDate: '20200311',
           court: '법제처',
-          link: 'https://www.law.go.kr/해석례/안건명-20-0045'
+          link: 'https://www.law.go.kr/LSW/expcInfoP.do?expcSeq=152837'
         }
       ]
     };
@@ -269,7 +269,7 @@ const getMockData = (target, query) => {
           caseNumber: '2021-04321',
           judgmentDate: '20210615',
           court: '중앙행정심판위원회',
-          link: 'https://www.law.go.kr/재결례/임금체불처분취소-(2021-04321)'
+          link: 'https://www.law.go.kr/LSW/deccInfoP.do?deccSeq=148392'
         }
       ]
     };
@@ -286,7 +286,7 @@ const getMockData = (target, query) => {
           promulgationDate: '20200815',
           promulgationNumber: '450',
           department: '법무부',
-          link: 'https://www.law.go.kr/행정규칙/주택임대차분쟁조정위원회운영규정'
+          link: 'https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000201083'
         }
       ]
     };
